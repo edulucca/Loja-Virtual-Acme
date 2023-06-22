@@ -7,8 +7,7 @@ import lombok.ToString;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-@Setter
-@Getter
+
 @ToString
 public class Assinatura {
     private BigDecimal mensalidade;
@@ -35,5 +34,21 @@ public class Assinatura {
 
     private Assinatura criarAssinatura(BigDecimal mensalidade, LocalDate begin, LocalDate end, Cliente cliente) {
         return new Assinatura(mensalidade, begin, end, cliente);
+    }
+
+    public BigDecimal getMensalidade() {
+        return mensalidade;
+    }
+
+    public LocalDate getBegin() {
+        return begin;
+    }
+
+    public LocalDate getEnd() {
+        return end;
+    }
+
+    public Cliente getCliente() {
+        return cliente;
     }
 }

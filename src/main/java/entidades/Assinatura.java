@@ -1,24 +1,27 @@
 package entidades;
 
-import lombok.Getter;
-import lombok.Setter;
+import entidades.enums.VencimentoEnum;
+import entidades.interfaces.TaxaAssinatura;
 import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.Optional;
 
 
 @ToString
 public class Assinatura {
     private BigDecimal mensalidade;
     private LocalDate begin;
-    private LocalDate end;
+    private Optional<LocalDate> end;
     private Cliente cliente;
+    private VencimentoEnum vencimentoEnum;
 
     public Assinatura(BigDecimal mensalidade, LocalDate begin, LocalDate end, Cliente cliente) {
         this.mensalidade = mensalidade;
         this.begin = begin;
-        this.end = end;
+        this.end = Optional.of(end);
         this.cliente = cliente;
     }
 
@@ -26,14 +29,7 @@ public class Assinatura {
         this.mensalidade = mensalidade;
         this.begin = begin;
         this.cliente = cliente;
-    }
-
-    private Assinatura criarAssinatura(BigDecimal mensalidade, LocalDate begin, Cliente cliente) {
-        return new Assinatura(mensalidade, begin, cliente);
-    }
-
-    private Assinatura criarAssinatura(BigDecimal mensalidade, LocalDate begin, LocalDate end, Cliente cliente) {
-        return new Assinatura(mensalidade, begin, end, cliente);
+        this.end = Optional.empty();
     }
 
     public BigDecimal getMensalidade() {
@@ -44,11 +40,35 @@ public class Assinatura {
         return begin;
     }
 
-    public LocalDate getEnd() {
+    public Optional<LocalDate> getEnd() {
         return end;
     }
 
-    public Cliente getCliente() {
-        return cliente;
+    public void setVencimentoEnum(VencimentoEnum vencimentoEnum) {
+        this.vencimentoEnum = vencimentoEnum;
+    }
+
+    public int getVencimentoEnum() {
+        return vencimentoEnum.getDia();
+    }
+
+    public long periodoAssinatura(){
+        return ChronoUnit.MONTHS.between(this.getBegin(), this.getEnd().orElse(LocalDate.now()));
+    }
+
+    public BigDecimal valorTotalAssinaturaSemTaxa() {
+        return getMensalidade().multiply(BigDecimal.valueOf(periodoAssinatura()));
+    }
+
+    public BigDecimal valorTotalAssinaturaComTaxa(TaxaAssinatura tipoAssinatura) {
+        return tipoAssinatura.aplicarTaxa(getMensalidade().multiply(BigDecimal.valueOf(periodoAssinatura())));
+    }
+
+    public boolean isAssinaturaAtiva(){
+        return getEnd().isEmpty();
+    }
+
+    public boolean isAssinaturaVencida(LocalDate dataPagamento){
+        return LocalDate.now().withDayOfMonth(getVencimentoEnum()).isBefore(dataPagamento);
     }
 }
